@@ -13,16 +13,14 @@ PHP-скрипт для входящего вебхука Bitrix24 (без пр�
 
 - PHP 7.4 или 8.x
 - Composer
-- Официальный **PHP SDK Bitrix24** `bitrix24/php-sdk: ^1.7.*`
+- Официальный **PHP SDK Bitrix24** `bitrix24/b24phpsdk: ^1.7.*`
 - Портал Bitrix24 с активным **входящим вебхуком**
 
-> ⚠️ Примечание: PHP и Composer не установлены в этой среде, и нет доступа в интернет, поэтому `composer install` / `vendor/` здесь выполнены быть не могут.
-> Выполните шаги настройки на машине с PHP + Composer и доступом в интернет.
 
 ## Настройка
 
 ```bash
-# 1. Установите зависимости (загружается bitrix24/php-sdk ^1.7)
+# 1. Установите зависимости (загружается bitrix24/b24phpsdk ^1.7)
 composer install
 
 # 2. Настройте URL вебхука
@@ -37,7 +35,7 @@ php index.php
 
 | Файл | Назначение |
 |------|------------|
-| `composer.json` | Манифест Composer; требует `bitrix24/php-sdk: ^1.7`, автозагрузка PSR-4 `B24Webhook\` → `src/` |
+| `composer.json` | Манифест Composer; требует `bitrix24/b24phpsdk: ^1.7`, автозагрузка PSR-4 `B24Webhook\` → `src/` |
 | `.env.example` | Пример файла окружения с `B24_WEBHOOK_URL` |
 | `index.php` | Точка входа: создаёт `Bitrix24DealCreator`, запускает сценарий, выводит JSON |
 | `src/Bitrix24DealCreator.php` | ООП-обёртка над SDK (контакт → сделка → строка товара) |
@@ -57,22 +55,24 @@ php index.php
 
 ## Справочник по SDK
 
-Реализация следует официальному примеру PHP SDK Bitrix24:
+Реализация следует официальному примеру PHP SDK Bitrix24 (сервисное API v1.7.*):
 
 ```php
+use Bitrix24\SDK\Services\ServiceBuilderFactory;
+
 $serviceBuilder = ServiceBuilderFactory::createServiceBuilderFromWebhook($webhookUrl);
 $crmService = $serviceBuilder->getCRMScope();
 
-$contactId = $crmService->contact()->add(['NAME' => '...', 'LAST_NAME' => '...'])->contact()->getId();
-$dealId    = $crmService->deal()->add(['TITLE' => '...', 'CONTACT_ID' => $contactId, 'OPPORTUNITY' => 110000, 'CURRENCY_ID' => 'RUB'])->deal()->getId();
-$rowId     = $crmService->item()->productrow()->add([
+$contactId = $crmService->contact()->add(['NAME' => '...', 'LAST_NAME' => '...'])->getId();
+$dealId    = $crmService->deal()->add(['TITLE' => '...', 'CONTACT_ID' => $contactId, 'OPPORTUNITY' => 110000, 'CURRENCY_ID' => 'RUB'])->getId();
+$rowId     = $crmService->itemProductrow()->add([
     'ownerType' => 'D',   // D = Сделка
     'ownerId'   => $dealId,
     'productName' => 'Ноутбук Dell',
     'price'     => 55000,
     'quantity'  => 2,
     'currency'  => 'RUB',
-])->productRow()->getId();
+])->getId();
 ```
 
 Все запросы выполняются через входящий вебхук; приложение OAuth не задействуется.

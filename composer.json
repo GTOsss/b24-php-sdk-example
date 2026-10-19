@@ -5,7 +5,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.4 || ^8.0",
-        "bitrix24/b24phpsdk": "^3.7",
+        "bitrix24/b24phpsdk": "^1.7",
         "vlucas/phpdotenv": "^5.7"
     },
     "require-dev": {

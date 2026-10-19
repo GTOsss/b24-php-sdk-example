@@ -18,6 +18,11 @@ use Throwable;
  *   2. Создаёт сделку, привязанную к контакту, с заданной суммой.
  *   3. Добавляет строку товара в сделку.
  *   4. Возвращает идентификаторы всех созданных сущностей.
+ *
+ * Реализовано на сервисном API Bitrix24 PHP SDK v1.7.*:
+ *   - $crmService->contact()->add(...)->getId()
+ *   - $crmService->deal()->add(...)->getId()
+ *   - $crmService->itemProductrow()->add(...)->getId()
  */
 class Bitrix24DealCreator
 {
@@ -43,12 +48,12 @@ class Bitrix24DealCreator
      */
     public function createContact(string $name, string $lastName): int
     {
-        $result = $this->crmService->item()->add(3, [
-            'NAME' => $name,
-            'LAST_NAME' => $lastName
+        $result = $this->crmService->contact()->add([
+            'NAME'      => $name,
+            'LAST_NAME' => $lastName,
         ]);
 
-        return (int) $result->item()->id;
+        return (int) $result->getId();
     }
 
     /**
@@ -63,24 +68,24 @@ class Bitrix24DealCreator
      */
     public function createDeal(int $contactId, string $title, float $amount, string $currency = 'RUB'): int
     {
-        $result = $this->crmService->item()->add(2, [
-            'TITLE'        => $title,
-            'CONTACT_ID'   => $contactId,
-            'OPPORTUNITY'  => $amount,
-            'CURRENCY_ID'  => $currency,
+        $result = $this->crmService->deal()->add([
+            'TITLE'       => $title,
+            'CONTACT_ID'  => $contactId,
+            'OPPORTUNITY' => $amount,
+            'CURRENCY_ID' => $currency,
         ]);
 
-        return (int) $result->item()->id;
+        return (int) $result->getId();
     }
 
     /**
      * Добавляет строку товара в сделку CRM через crm.item.productrow.add.
      *
-     * @param int    $dealId     ID сделки (ownerType = 'D')
+     * @param int    $dealId      ID сделки (ownerType = 'D')
      * @param string $productName Название товара, например 'Ноутбук Dell'
-     * @param float  $price      Цена за единицу
-     * @param int    $quantity   Количество
-     * @param string $currency   Валюта строки товара, по умолчанию 'RUB'
+     * @param float  $price       Цена за единицу
+     * @param int    $quantity    Количество
+     * @param string $currency    Валюта строки товара, по умолчанию 'RUB'
      * @param int|null $productId Необязательный ID товара из каталога
      * @return int ID созданной строки товара
      * @throws Throwable при ошибке SDK/API
